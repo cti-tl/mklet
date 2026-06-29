@@ -1,8 +1,13 @@
 :root {
+  color-scheme: light dark;
   --main-text: #333;
   --main-bg: #fff;
   --main-stripe: #90cad44f;
   --main-link: black;
+  --main-muted: #595959; /* コピーライト等の控えめテキスト(地に対して可読なグレー) */
+  /* ライト時の背景テクスチャ。ダークでは none に切り替える(下の @media)。
+     body と footer .copyright で共有し、背景挙動を揃える。 */
+  --bg-texture: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='8'%20height='8'%3E%3Crect%20width='8'%20height='8'%20fill='%23f2f2f2'/%3E%3Cpath%20d='M0%208L8%200'%20stroke='%23e6e6e6'%20stroke-width='1'/%3E%3C/svg%3E");
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -10,6 +15,8 @@
     --main-bg: #000;
     --main-stripe: #000000ec;
     --main-link: gray;
+    --main-muted: #9a9a9a;
+    --bg-texture: none; /* ダークはテクスチャ無し＝背景色(#000)の黒一色 */
   }
 }
 
@@ -24,6 +31,7 @@
 
 html {
   overflow-y: scroll;
+  background-color: var(--main-bg);
 }
 
 html,
@@ -51,9 +59,12 @@ body {
 }
 
 body {
-  background-image: url("http://bradjasper.com/subtle-patterns-bookmarklet/patterns/gray_jean.png");
+  /* 背景はテーマ変数で切替: ライト=テクスチャ / ダーク=none(背景色のみ)。
+     変数切替なのでカスケード順に依存せず確実に反映される。 */
+  background-color: var(--main-bg);
+  color: var(--main-text);
+  background-image: var(--bg-texture);
   background-repeat: repeat;
-  background-size: auto;
   /* 左斜め
   background-color: var(--main-stripe);
   background-image: repeating-linear-gradient(
@@ -173,9 +184,13 @@ footer div.banner img {
 }
 footer div.copyright {
   text-align: center;
+  /* body と同じ背景挙動(ライト=テクスチャ / ダーク=黒一色)に揃える */
+  background-color: var(--main-bg);
+  background-image: var(--bg-texture);
+  background-repeat: repeat;
 }
 footer div.copyright small {
-  color: gray;
+  color: var(--main-muted);
   font-size: max(12px, 0.6rem);
 }
 .button1 {
