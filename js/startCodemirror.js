@@ -16,17 +16,8 @@ doc.setValue(`javascript: (function(d){
   alert('test');
   })(document);`);
 
-// 外部画像やバナーの読み込み完了(window.onload)を待つと、ブラウザ/OSの混在コンテンツ
-// 制御や読み込み待ちの差で初期化が遅れる/走らないことがある。
-// DOM が使える時点(=defer の beautify/app.js 実行後)で確実に初期化する。
-function initMklet() {
-  jscompCM();
-}
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", initMklet);
-} else {
-  initMklet();
-}
+// イベントハンドラは初期化より先に必ず登録する。
+// (初期化 initMklet() が読み込み順の都合で失敗しても、blur/change が効くようにするため)
 editor.on("blur", function () {
   jscompCM();
 });
@@ -41,3 +32,19 @@ editor.on("drop", function (cm, e) {
   if (!dt || !dt.files) return;
   // TODO: 必要に応じてドロップされたファイルの取り込み処理を実装する
 });
+
+// 初期整形。外部画像/バナーの読み込み(window.onload)は待たない。
+// このファイルは async、jscompCM(app.js)/js_beautify(beautify.min.js)は defer のため、
+// まだ読み込まれていないことがある。未定義なら window.load 後に再試行して確実に実行する。
+function initMklet() {
+  if (typeof jscompCM !== "function" || typeof js_beautify !== "function") {
+    window.addEventListener("load", initMklet, { once: true });
+    return;
+  }
+  jscompCM();
+}
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initMklet);
+} else {
+  initMklet();
+}
